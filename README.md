@@ -1,6 +1,9 @@
 # 📐 Axonometric Map Transformer — QGIS Plugin
 
-[![QGIS](https://img.shields.io/badge/QGIS-3.16+-brightgreen.svg)](https://qgis.org)
+[![Version](https://img.shields.io/badge/Version-v1.1.2-blue.svg)](https://plugins.qgis.org/plugins/6219/)
+[![QGIS 4 Ready](https://img.shields.io/badge/QGIS%204-Ready-brightgreen.svg)](https://plugins.qgis.org/plugins/6219/)
+[![Plugin Portal](https://img.shields.io/badge/Plugin%20ID-6219-orange.svg)](https://plugins.qgis.org/plugins/6219/)
+[![QGIS](https://img.shields.io/badge/QGIS-3.16%2B%20%2F%204.x-brightgreen.svg)](https://qgis.org)
 [![Python](https://img.shields.io/badge/Python-3.x-blue.svg)](https://python.org)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)]()
@@ -65,7 +68,7 @@ axonometric_transformer/
 ├── __init__.py               # Plugin initialization factory
 ├── plugin.py                 # QGIS menu and toolbar action hooks
 ├── transformer_core.py       # Affine geometry, squashing, & extrusion engine
-├── transformer_dialog.py     # PyQt5 UI dialog & interactive preview
+├── transformer_dialog.py     # PyQt5 / PyQt6 (qgis.PyQt) UI dialog & interactive preview
 ├── icon.png                  # Plugin toolbar icon (PNG)
 ├── icon.svg                  # Vector icon (SVG)
 └── README.md                 # Documentation
