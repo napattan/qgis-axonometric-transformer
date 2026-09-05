@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
 """Test disc base plate rendering in PyQt/QPainter."""
 import sys
-from PyQt5.QtCore import Qt, QRectF, QPointF, QSize
-from PyQt5.QtGui import QImage, QPainter, QPainterPath, QColor, QPen, QBrush, QPolygonF
-from PyQt5.QtWidgets import QApplication
+try:
+    from qgis.PyQt.QtCore import Qt, QRectF, QPointF, QSize
+    from qgis.PyQt.QtGui import QImage, QPainter, QPainterPath, QColor, QPen, QBrush, QPolygonF
+    from qgis.PyQt.QtWidgets import QApplication
+except ImportError:
+    from PyQt6.QtCore import Qt, QRectF, QPointF, QSize
+    from PyQt6.QtGui import QImage, QPainter, QPainterPath, QColor, QPen, QBrush, QPolygonF
+    from PyQt6.QtWidgets import QApplication
 
 app = QApplication.instance() or QApplication(sys.argv)
 
@@ -13,11 +18,11 @@ rx = 200
 ry = 200 * 0.57735  # ~115.47
 depth = 40
 
-img = QImage(600, 500, QImage.Format_ARGB32_Premultiplied)
-img.fill(Qt.transparent)
+img = QImage(600, 500, QImage.Format.Format_ARGB32_Premultiplied)
+img.fill(Qt.GlobalColor.transparent)
 
 painter = QPainter(img)
-painter.setRenderHint(QPainter.Antialiasing, True)
+painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
 
 ext_col = QColor("#cbd5e1")
 
@@ -53,7 +58,7 @@ painter.drawPath(skirt_path)
 bottom_rim = QPainterPath()
 bottom_rim.arcMoveTo(QRectF(cx - rx, cy + depth - ry, rx * 2, ry * 2), 180)
 bottom_rim.arcTo(QRectF(cx - rx, cy + depth - ry, rx * 2, ry * 2), 180, -180)
-painter.setBrush(Qt.NoBrush)
+painter.setBrush(Qt.BrushStyle.NoBrush)
 painter.setPen(QPen(QColor("#64748b"), 2.0))
 painter.drawPath(bottom_rim)
 

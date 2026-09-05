@@ -7,13 +7,13 @@ if sys.stdout and hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
 try:
-    from PyQt5.QtCore import Qt, QSize
-    from PyQt5.QtGui import QImage, QPainter, QColor, QPen, QBrush
-    from PyQt5.QtWidgets import QApplication
-except ImportError:
     from qgis.PyQt.QtCore import Qt, QSize
     from qgis.PyQt.QtGui import QImage, QPainter, QColor, QPen, QBrush
     from qgis.PyQt.QtWidgets import QApplication
+except ImportError:
+    from PyQt6.QtCore import Qt, QSize
+    from PyQt6.QtGui import QImage, QPainter, QColor, QPen, QBrush
+    from PyQt6.QtWidgets import QApplication
 
 from transformer_core import (
     AxoParams, transform_qimage, estimate_output_size, scale_params,
@@ -23,10 +23,10 @@ app = QApplication.instance() or QApplication(sys.argv)
 
 
 def make_map(w=800, h=600):
-    img = QImage(QSize(w, h), QImage.Format_ARGB32_Premultiplied)
+    img = QImage(QSize(w, h), QImage.Format.Format_ARGB32_Premultiplied)
     img.fill(QColor("#f8fafc"))
     p = QPainter(img)
-    p.setRenderHint(QPainter.Antialiasing, True)
+    p.setRenderHint(QPainter.RenderHint.Antialiasing, True)
     p.setPen(QPen(QColor("#cbd5e1"), 1))
     for x in range(0, w, 50):
         p.drawLine(x, 0, x, h)

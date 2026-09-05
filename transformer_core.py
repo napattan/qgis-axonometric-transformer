@@ -16,15 +16,7 @@ try:
     from qgis.PyQt.QtWidgets import QApplication
     HAS_QT = True
 except ImportError:
-    try:
-        from PyQt5.QtCore import Qt, QPointF, QRectF, QSize, QMimeData, QByteArray, QBuffer, QIODevice, QUrl
-        from PyQt5.QtGui import (
-            QImage, QPainter, QColor, QPen, QBrush, QPainterPath, QPolygonF
-        )
-        from PyQt5.QtWidgets import QApplication
-        HAS_QT = True
-    except ImportError:
-        HAS_QT = False
+    HAS_QT = False
 
 
 PROJECTION_PRESETS = {
@@ -133,38 +125,34 @@ def scale_params(params: AxoParams, scale: float) -> AxoParams:
 def _allocate_image(dest_w: int, dest_h: int) -> QImage:
     dest_w = max(10, min(MAX_SAFE_DIM, int(dest_w)))
     dest_h = max(10, min(MAX_SAFE_DIM, int(dest_h)))
-    img = QImage(QSize(dest_w, dest_h), QImage.Format_ARGB32_Premultiplied)
+    img = QImage(QSize(dest_w, dest_h), QImage.Format.Format_ARGB32_Premultiplied)
     if img.isNull():
         dest_w = max(10, dest_w // 2)
         dest_h = max(10, dest_h // 2)
-        img = QImage(QSize(dest_w, dest_h), QImage.Format_ARGB32_Premultiplied)
+        img = QImage(QSize(dest_w, dest_h), QImage.Format.Format_ARGB32_Premultiplied)
     if not img.isNull():
-        img.fill(Qt.transparent)
+        img.fill(Qt.GlobalColor.transparent)
     return img
 
 
 def _begin_painter(img: QImage) -> QPainter:
     painter = QPainter(img)
-    painter.setRenderHint(QPainter.Antialiasing, True)
-    painter.setRenderHint(QPainter.SmoothPixmapTransform, True)
-    try:
-        painter.setRenderHint(QPainter.HighQualityAntialiasing, True)
-    except AttributeError:
-        pass
+    painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+    painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform, True)
     return painter
 
 
 def _make_stroke_pen(params: AxoParams) -> QPen:
     pen = QPen(QColor(params.stroke_color), max(1, params.stroke_width))
-    pen.setCapStyle(Qt.RoundCap)
-    pen.setJoinStyle(Qt.RoundJoin)
+    pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+    pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
     if params.is_dashed:
         dash_len = max(12, params.stroke_width * 3)
         gap_len = max(8, params.stroke_width * 2)
         width = float(max(1, params.stroke_width))
         pen.setDashPattern([dash_len / width, gap_len / width])
     else:
-        pen.setStyle(Qt.SolidLine)
+        pen.setStyle(Qt.PenStyle.SolidLine)
     return pen
 
 
@@ -193,9 +181,9 @@ def _draw_extruded_shells(
     ext_col: QColor,
 ) -> None:
     edge_pen = QPen(QColor("#94a3b8"), 1.0)
-    edge_pen.setJoinStyle(Qt.RoundJoin)
+    edge_pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
     bottom_pen = QPen(QColor("#94a3b8"), 1.2)
-    bottom_pen.setJoinStyle(Qt.RoundJoin)
+    bottom_pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
 
     for shell in shells:
         if len(shell) < 3:
@@ -241,14 +229,14 @@ def _draw_source_map(
     painter.scale(1.0, h_ratio)
     painter.rotate(angle_deg)
     if clip_path is not None:
-        painter.setClipPath(clip_path, Qt.IntersectClip)
+        painter.setClipPath(clip_path, Qt.ClipOperation.IntersectClip)
     painter.drawImage(QRectF(-w / 2.0, -h / 2.0, float(w), float(h)), src_img)
     painter.restore()
 
 
 def _path_from_rings(rings: Sequence[Sequence[Point]], cx: float = 0.0, cy: float = 0.0) -> QPainterPath:
     path = QPainterPath()
-    path.setFillRule(Qt.OddEvenFill)
+    path.setFillRule(Qt.FillRule.OddEvenFill)
     for ring in rings:
         if len(ring) < 2:
             continue
@@ -353,7 +341,7 @@ def transform_qimage(src_img: "QImage", params: AxoParams) -> "QImage":
             _draw_source_map(painter, src_img, cx, cy, h_ratio, params.angle_deg)
 
             if params.stroke_width > 0:
-                painter.setBrush(Qt.NoBrush)
+                painter.setBrush(Qt.BrushStyle.NoBrush)
                 painter.setPen(_make_stroke_pen(params))
                 painter.drawPolygon(_qpoly(corners, cx, cy))
 
@@ -402,7 +390,7 @@ def transform_qimage(src_img: "QImage", params: AxoParams) -> "QImage":
                     bottom_rect = QRectF(cx - rx, cy + depth - ry, rx * 2, ry * 2)
                     bottom_arc.arcMoveTo(bottom_rect, 180)
                     bottom_arc.arcTo(bottom_rect, 180, -180)
-                    painter.setBrush(Qt.NoBrush)
+                    painter.setBrush(Qt.BrushStyle.NoBrush)
                     painter.setPen(QPen(QColor("#64748b"), 1.5))
                     painter.drawPath(bottom_arc)
                 else:
@@ -447,7 +435,7 @@ def transform_qimage(src_img: "QImage", params: AxoParams) -> "QImage":
             painter.restore()
 
             if params.stroke_width > 0:
-                painter.setBrush(Qt.NoBrush)
+                painter.setBrush(Qt.BrushStyle.NoBrush)
                 painter.setPen(_make_stroke_pen(params))
                 if mode == "disc":
                     painter.drawEllipse(QRectF(cx - rx, cy - ry, rx * 2, ry * 2))
@@ -502,7 +490,7 @@ def transform_qimage(src_img: "QImage", params: AxoParams) -> "QImage":
             )
 
             if params.stroke_width > 0:
-                painter.setBrush(Qt.NoBrush)
+                painter.setBrush(Qt.BrushStyle.NoBrush)
                 painter.setPen(_make_stroke_pen(params))
                 painter.drawPath(_path_from_rings(transformed_rings, cx, cy))
 
@@ -525,12 +513,12 @@ def copy_image_to_clipboard(image: "QImage") -> bool:
         return False
 
     export = image
-    if image.format() == QImage.Format_ARGB32_Premultiplied:
-        export = image.convertToFormat(QImage.Format_ARGB32)
+    if image.format() == QImage.Format.Format_ARGB32_Premultiplied:
+        export = image.convertToFormat(QImage.Format.Format_ARGB32)
 
     byte_array = QByteArray()
     buffer = QBuffer(byte_array)
-    buffer.open(QIODevice.WriteOnly)
+    buffer.open(QIODevice.OpenModeFlag.WriteOnly)
     export.save(buffer, "PNG")
     buffer.close()
 

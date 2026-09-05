@@ -74,7 +74,7 @@ class AspectRatioPixmapLabel(QLabel):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setMinimumSize(320, 240)
-        self.setAlignment(Qt.AlignCenter)
+        self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setStyleSheet(self._READY_STYLE)
         self._pixmap = QPixmap()
         self._fitted = QPixmap()
@@ -99,8 +99,8 @@ class AspectRatioPixmapLabel(QLabel):
 
         scaled = self._pixmap.scaled(
             target,
-            Qt.KeepAspectRatio,
-            Qt.SmoothTransformation
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation
         )
         self._fitted = scaled
         self._fitted_for = QSize(target)
@@ -153,7 +153,7 @@ class AxonometricTransformerDialog(QDialog):
         self.main_layout.setSpacing(12)
 
         # Splitter between controls and preview
-        self.splitter = QSplitter(Qt.Horizontal, self)
+        self.splitter = QSplitter(Qt.Orientation.Horizontal, self)
         self.main_layout.addWidget(self.splitter)
 
         # -------------------------------------------------------------
@@ -161,8 +161,8 @@ class AxonometricTransformerDialog(QDialog):
         # -------------------------------------------------------------
         self.left_scroll = QScrollArea(self.splitter)
         self.left_scroll.setWidgetResizable(True)
-        self.left_scroll.setFrameShape(QFrame.NoFrame)
-        self.left_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.left_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        self.left_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.left_scroll.setMinimumWidth(380)
         self.left_scroll.setMaximumWidth(460)
 
@@ -252,7 +252,7 @@ class AxonometricTransformerDialog(QDialog):
         # Custom Height Ratio Slider
         h_ratio = QHBoxLayout()
         h_ratio.addWidget(QLabel("Height Squash:", self.grp_proj))
-        self.slider_ratio = QSlider(Qt.Horizontal, self.grp_proj)
+        self.slider_ratio = QSlider(Qt.Orientation.Horizontal, self.grp_proj)
         self.slider_ratio.setRange(20, 100)
         self.slider_ratio.setValue(int(self.params.aspect_ratio * 100))
         self.slider_ratio.valueChanged.connect(self._on_ratio_slider_changed)
@@ -265,7 +265,7 @@ class AxonometricTransformerDialog(QDialog):
         # Orientation Angle
         h_angle = QHBoxLayout()
         h_angle.addWidget(QLabel("Plan Orientation:", self.grp_proj))
-        self.slider_angle = QSlider(Qt.Horizontal, self.grp_proj)
+        self.slider_angle = QSlider(Qt.Orientation.Horizontal, self.grp_proj)
         self.slider_angle.setRange(-180, 180)
         self.slider_angle.setValue(45)
         self.slider_angle.valueChanged.connect(self._on_angle_changed)
@@ -293,8 +293,8 @@ class AxonometricTransformerDialog(QDialog):
         h_mode = QHBoxLayout()
         h_mode.addWidget(QLabel("Framing Mode:", self.grp_frame))
         self.combo_mode = QComboBox(self.grp_frame)
-        self.combo_mode.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.combo_mode.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLengthWithIcon)
+        self.combo_mode.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        self.combo_mode.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
         self.combo_mode.setMinimumContentsLength(18)
         self.combo_mode.addItem("🖼️ Full Plan / Tight Box", "full")
         self.combo_mode.addItem("⭕ Circular Site Disc", "disc")
@@ -306,7 +306,7 @@ class AxonometricTransformerDialog(QDialog):
 
         # Container for Vector Layer Mask Options (visible when mode == 'layer_mask')
         self.widget_frame_layer = QWidget(self.grp_frame)
-        self.widget_frame_layer.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        self.widget_frame_layer.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         layout_frame_layer = QVBoxLayout(self.widget_frame_layer)
         layout_frame_layer.setContentsMargins(0, 4, 0, 4)
         layout_frame_layer.setSpacing(6)
@@ -314,8 +314,8 @@ class AxonometricTransformerDialog(QDialog):
         h_fl = QHBoxLayout()
         h_fl.addWidget(QLabel("Frame Layer:", self.widget_frame_layer))
         self.combo_frame_layer = QComboBox(self.widget_frame_layer)
-        self.combo_frame_layer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.combo_frame_layer.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLengthWithIcon)
+        self.combo_frame_layer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        self.combo_frame_layer.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
         self.combo_frame_layer.setMinimumContentsLength(18)
         self.combo_frame_layer.setMinimumWidth(80)
         self.combo_frame_layer.setMaxVisibleItems(32)
@@ -341,7 +341,7 @@ class AxonometricTransformerDialog(QDialog):
 
         btn_fit_extent = QPushButton("🔍 Fit Extent to Layer", self.widget_frame_layer)
         btn_fit_extent.setToolTip("Set map source extent to this framing layer and capture")
-        btn_fit_extent.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        btn_fit_extent.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         btn_fit_extent.setStyleSheet(
             "padding: 4px 8px; font-size: 11px; background: #f0fdf4; "
             "color: #15803d; border: 1px solid #bbf7d0; border-radius: 3px;"
@@ -462,7 +462,7 @@ class AxonometricTransformerDialog(QDialog):
 
         # Preview Canvas Display
         self.preview_label = AspectRatioPixmapLabel(self.right_widget)
-        self.preview_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.preview_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.right_layout.addWidget(self.preview_label, 1)
 
         # Action Buttons
@@ -472,7 +472,7 @@ class AxonometricTransformerDialog(QDialog):
         # Primary Action: Copy to Clipboard
         self.btn_copy = QPushButton("📋 Copy to Clipboard (Cmd/Ctrl+C)", self.right_widget)
         self.btn_copy.setStyleSheet(COPY_BTN_STYLE)
-        self.btn_copy.setShortcut(QKeySequence.Copy)
+        self.btn_copy.setShortcut(QKeySequence.StandardKey.Copy)
         self.btn_copy.setToolTip("Copy the full-resolution axonometric PNG (with alpha) to the clipboard")
         self.btn_copy.clicked.connect(self._on_copy_to_clipboard)
         h_actions.addWidget(self.btn_copy, 2)
@@ -589,10 +589,10 @@ class AxonometricTransformerDialog(QDialog):
         if not isinstance(layer, QgsVectorLayer) or not layer.isValid():
             return False
         # QGIS 3.40 has geometryType(); QgsWkbTypes.isPolygon was added later.
-        if layer.geometryType() == QgsWkbTypes.PolygonGeometry:
+        if layer.geometryType() == QgsWkbTypes.GeometryType.PolygonGeometry:
             return True
         try:
-            return QgsWkbTypes.geometryType(layer.wkbType()) == QgsWkbTypes.PolygonGeometry
+            return QgsWkbTypes.geometryType(layer.wkbType()) == QgsWkbTypes.GeometryType.PolygonGeometry
         except Exception:
             return False
 
@@ -981,10 +981,10 @@ class AxonometricTransformerDialog(QDialog):
         bg = QColor(0, 0, 0, 0) if transparent else QColor(255, 255, 255, 255)
         map_settings.setBackgroundColor(bg)
 
-        img = QImage(QSize(w, h), QImage.Format_ARGB32_Premultiplied)
+        img = QImage(QSize(w, h), QImage.Format.Format_ARGB32_Premultiplied)
         if img.isNull():
             w, h = self._clamp_wh(w, h, max_edge=4096)
-            img = QImage(QSize(w, h), QImage.Format_ARGB32_Premultiplied)
+            img = QImage(QSize(w, h), QImage.Format.Format_ARGB32_Premultiplied)
         img.fill(bg)
 
         painter = QPainter(img)
@@ -1009,7 +1009,7 @@ class AxonometricTransformerDialog(QDialog):
         transparent = self.chk_transparent.isChecked()
         self._output_scale = int(scale_mult)
         self.lbl_stats.setText("Capturing map…")
-        QApplication.setOverrideCursor(Qt.WaitCursor)
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
 
         try:
             canvas = self.iface.mapCanvas()
@@ -1186,7 +1186,7 @@ class AxonometricTransformerDialog(QDialog):
         scale = PREVIEW_MAX_EDGE / float(edge)
         nw = max(1, int(round(w * scale)))
         nh = max(1, int(round(h * scale)))
-        return img.scaled(nw, nh, Qt.IgnoreAspectRatio, Qt.SmoothTransformation), scale
+        return img.scaled(nw, nh, Qt.AspectRatioMode.IgnoreAspectRatio, Qt.TransformationMode.SmoothTransformation), scale
 
     def _mode_label(self):
         mode_str = str(self.params.mode).upper()
@@ -1232,7 +1232,7 @@ class AxonometricTransformerDialog(QDialog):
         if not self._export_dirty and not self._export_image.isNull():
             return self._export_image
 
-        QApplication.setOverrideCursor(Qt.WaitCursor)
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         try:
             self._export_image = transform_qimage(self.raw_source_image, self.params)
             self.transformed_image = self._export_image
@@ -1323,9 +1323,9 @@ class AxonometricTransformerDialog(QDialog):
 
         pic_item = QgsLayoutItemPicture(target_layout)
         pic_item.setPicturePath(temp_img_path)
-        pic_item.attemptMove(QgsLayoutPoint(20, 20, QgsUnitTypes.LayoutMillimeters))
+        pic_item.attemptMove(QgsLayoutPoint(20, 20, QgsUnitTypes.LayoutUnit.LayoutMillimeters))
         aspect = image.height() / float(max(1, image.width()))
-        pic_item.attemptResize(QgsLayoutSize(120, 120 * aspect, QgsUnitTypes.LayoutMillimeters))
+        pic_item.attemptResize(QgsLayoutSize(120, 120 * aspect, QgsUnitTypes.LayoutUnit.LayoutMillimeters))
         target_layout.addItem(pic_item)
 
         QMessageBox.information(

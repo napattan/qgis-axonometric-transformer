@@ -9,23 +9,23 @@ import sys
 import math
 
 try:
-    from PyQt5.QtCore import Qt, QSize, QRectF, QPointF
-    from PyQt5.QtGui import QImage, QPainter, QColor, QPen, QBrush, QPolygonF
-    from PyQt5.QtWidgets import QApplication
-except ImportError:
     from qgis.PyQt.QtCore import Qt, QSize, QRectF, QPointF
     from qgis.PyQt.QtGui import QImage, QPainter, QColor, QPen, QBrush, QPolygonF
     from qgis.PyQt.QtWidgets import QApplication
+except ImportError:
+    from PyQt6.QtCore import Qt, QSize, QRectF, QPointF
+    from PyQt6.QtGui import QImage, QPainter, QColor, QPen, QBrush, QPolygonF
+    from PyQt6.QtWidgets import QApplication
 
 from transformer_core import AxoParams, transform_qimage
 
 app = QApplication.instance() or QApplication(sys.argv)
 
 def create_test_map_image(w=800, h=600):
-    img = QImage(QSize(w, h), QImage.Format_ARGB32_Premultiplied)
+    img = QImage(QSize(w, h), QImage.Format.Format_ARGB32_Premultiplied)
     img.fill(QColor("#f8fafc"))
     p = QPainter(img)
-    p.setRenderHint(QPainter.Antialiasing, True)
+    p.setRenderHint(QPainter.RenderHint.Antialiasing, True)
     
     # Grid lines
     p.setPen(QPen(QColor("#cbd5e1"), 1))
