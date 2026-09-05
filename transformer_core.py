@@ -149,7 +149,7 @@ def _begin_painter(img: QImage) -> QPainter:
     painter.setRenderHint(QPainter.SmoothPixmapTransform, True)
     try:
         painter.setRenderHint(QPainter.HighQualityAntialiasing, True)
-    except Exception:
+    except AttributeError:
         pass
     return painter
 
@@ -550,7 +550,7 @@ def copy_image_to_clipboard(image: "QImage") -> bool:
         temp_path = os.path.join(temp_dir, "qgis_axonometric_clipboard.png")
         export.save(temp_path, "PNG")
         mime_data.setUrls([QUrl.fromLocalFile(temp_path)])
-    except Exception:
+    except (OSError, AttributeError):
         pass
 
     clipboard.setMimeData(mime_data)

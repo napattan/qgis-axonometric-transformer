@@ -9,9 +9,9 @@ import os
 import tempfile
 from typing import Optional, List, Dict, Tuple
 
-from qgis.PyQt.QtCore import Qt, QSize, QRectF, QPointF, QTimer
+from qgis.PyQt.QtCore import Qt, QSize, QPointF, QTimer
 from qgis.PyQt.QtGui import (
-    QImage, QPixmap, QPainter, QColor, QPen, QBrush, QKeySequence
+    QImage, QPixmap, QPainter, QColor, QKeySequence
 )
 from qgis.PyQt.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
@@ -546,7 +546,7 @@ class AxonometricTransformerDialog(QDialog):
                 bm_name = bm.name() or "Unnamed Bookmark"
                 self.combo_bookmark.addItem(f"📌 {bm_name}", bm_id)
                 self.bookmarks_map[bm_id] = bm
-        except Exception:
+        except (AttributeError, RuntimeError, TypeError):  # nosec B110
             pass
 
         if self.combo_bookmark.count() == 0:
@@ -792,7 +792,7 @@ class AxonometricTransformerDialog(QDialog):
                 geom = QgsGeometry(geom)
                 try:
                     geom.transform(transform)
-                except Exception:
+                except (RuntimeError, TypeError, Exception):  # nosec B110
                     pass
 
             try:
@@ -801,12 +801,12 @@ class AxonometricTransformerDialog(QDialog):
                 clipped_geom = geom.intersection(clip_box_geom)
                 if clipped_geom and not clipped_geom.isEmpty():
                     geom = clipped_geom
-            except Exception:
+            except (RuntimeError, TypeError, Exception):  # nosec B110
                 pass
 
             try:
                 geom = geom.simplify(px_tol * 1.5)
-            except Exception:
+            except (RuntimeError, TypeError, Exception):  # nosec B110
                 pass
 
             polys = []
@@ -955,7 +955,7 @@ class AxonometricTransformerDialog(QDialog):
             if val is not None:
                 try:
                     flags |= val
-                except Exception:
+                except (TypeError, ValueError, AttributeError):  # nosec B110
                     pass
         map_settings.setFlags(flags)
 
@@ -1124,7 +1124,7 @@ class AxonometricTransformerDialog(QDialog):
                             if hasattr(item, "crs"):
                                 self.last_render_crs = item.crs()
                             break
-                except Exception:
+                except (AttributeError, RuntimeError):  # nosec B110
                     pass
 
             self._update_render(immediate=True)

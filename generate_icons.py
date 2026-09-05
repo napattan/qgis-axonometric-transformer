@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Generate clean SVG and PNG icons for the QGIS Axonometric Transformer Plugin."""
 import os
-import math
 from PIL import Image, ImageDraw
 
 def generate_icons(output_dir):
@@ -27,14 +26,7 @@ def generate_icons(output_dir):
     ]
     # Draw cylinder base
     # Bottom ellipse arc
-    draw.polygon([
-        (cx - r, cy),
-        (cx - r, cy + depth),
-        (cx, cy + ry + depth),
-        (cx + r, cy + depth),
-        (cx + r, cy),
-        (cx, cy + ry)
-    ], fill=(148, 163, 184, 255), outline=(100, 116, 139, 255))
+    draw.polygon(slab_pts, fill=(148, 163, 184, 255), outline=(100, 116, 139, 255))
 
     # Top floating isometric plate
     draw.ellipse([cx - r, cy - ry, cx + r, cy + ry], fill=(37, 99, 235, 240), outline=(29, 78, 216, 255), width=3)

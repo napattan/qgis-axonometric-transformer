@@ -5,7 +5,6 @@ Registers toolbar actions, menu items, and handles dialog lifecycle.
 """
 
 import os
-from qgis.PyQt.QtCore import Qt, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 
