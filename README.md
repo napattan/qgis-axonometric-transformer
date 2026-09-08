@@ -1,8 +1,8 @@
 # 📐 Axonometric Map Transformer — QGIS Plugin
 
 [![Version](https://img.shields.io/badge/Version-v1.1.3-blue.svg)](https://github.com/napattan/qgis-axonometric-transformer)
-[![Portal](https://img.shields.io/badge/plugins.qgis.org-Registered%20%236219-orange.svg)](https://plugins.qgis.org/plugins/axonometric_transformer/)
-[![Public Version](https://img.shields.io/badge/Plugin%20Manager-Pending%20approval-lightgrey.svg)](https://plugins.qgis.org/plugins/axonometric_transformer/)
+[![Portal](https://img.shields.io/badge/plugins.qgis.org-Approved%20%236219-brightgreen.svg)](https://plugins.qgis.org/plugins/axonometric_transformer/)
+[![Plugin Manager](https://img.shields.io/badge/Plugin%20Manager-1--Click%20Install%20Live-brightgreen.svg)](https://plugins.qgis.org/plugins/axonometric_transformer/)
 [![QGIS 4 Ready](https://img.shields.io/badge/QGIS%204%20Ready-Local%20AST%20verified-brightgreen.svg)](https://github.com/napattan/qgis-axonometric-transformer)
 [![QGIS](https://img.shields.io/badge/QGIS-3.16%2B%20%2F%204.x-brightgreen.svg)](https://qgis.org)
 [![Python](https://img.shields.io/badge/Python-3.x-blue.svg)](https://python.org)
@@ -12,7 +12,7 @@
 > **Direct QGIS to 3D Axonometric & Isometric Plan Generator**  
 > Eliminates the manual *"Export 2D Map → Switch to Graphic Software → Skew/Rotate/Extrude"* pipeline. Transform the active QGIS map canvas, selected layer extents, or print layouts into presentation-ready 3D axonometric diagram plates with **1-click clipboard copy (`Ctrl+C` / `Cmd+C`)** directly into Adobe Illustrator, Affinity Designer, Photoshop, and slide presentations.
 
-**Release status (truth lock):** Registered on [plugins.qgis.org](https://plugins.qgis.org/plugins/axonometric_transformer/) as Plugin ID **6219** (`axonometric_transformer`). Latest upload is **v1.1.3** (8 Sep 2026). Portal security scan: 100% pass, 0 issues, no developer config files (plain Validated, not Validated (configured)). Qt6 check green. The public listing still shows **no public version yet**, so **Plugins → Manage and Install Plugins** search install is not available until a version is approved. Install today via **Method A (manual)** below. Local AST check: QGIS 4 Ready.
+**Release status (truth lock):** Approved and LIVE on [plugins.qgis.org](https://plugins.qgis.org/plugins/axonometric_transformer/) as Plugin ID **6219** (`axonometric_transformer`, **v1.1.3**). Portal security scan: 100% pass, 0 issues. In-app search and 1-click install are live via **Plugins → Manage and Install Plugins**. QGIS 4 Ready.
 
 ---
 
@@ -47,22 +47,22 @@
 ---
 
 ## 🚀 Installation
+ 
+### Method A: Official QGIS Plugin Manager (Recommended)
+Now available directly in the official QGIS repository:
+1. Open **QGIS Desktop** (3.16+).
+2. Navigate to **Plugins → Manage and Install Plugins...**
+3. Select the **All** tab and search for **`Axonometric Map Transformer`**.
+4. Click **Install Plugin**.
+ 
+*(The leaf/cube icon will appear immediately in your Toolbar and under the **Plugins → Axonometric Map Transformer** menu).*
 
-### Method A: Manual Installation via Script (current recommended path)
+### Method B: Manual Installation (For Developers)
 Clone or download this repository, then run:
 ```bash
 python install_plugin.py
 ```
-*(Automatically links or copies files into your QGIS default profile plugin directory.)* Then enable the plugin under **Plugins → Manage and Install Plugins → Installed**.
-
-### Method B: QGIS Plugin Manager (after public version approval)
-When the portal publishes an approved version of Plugin ID 6219:
-1. Open **QGIS Desktop**.
-2. Go to **Plugins → Manage and Install Plugins...**
-3. Search for **Axonometric Map Transformer**.
-4. Click **Install Plugin**.
-
-Until that approval lands, Method B will not find a downloadable release.
+*(Automatically symlinks or copies files into your QGIS default profile plugin directory.)* Then enable the plugin under **Plugins → Manage and Install Plugins → Installed**.
 
 ---
 
