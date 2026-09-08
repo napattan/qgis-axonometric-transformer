@@ -1,6 +1,6 @@
 # 📐 Axonometric Map Transformer — QGIS Plugin
 
-[![Version](https://img.shields.io/badge/Version-v1.1.2-blue.svg)](https://github.com/napattan/qgis-axonometric-transformer)
+[![Version](https://img.shields.io/badge/Version-v1.1.3-blue.svg)](https://github.com/napattan/qgis-axonometric-transformer)
 [![Portal](https://img.shields.io/badge/plugins.qgis.org-Registered%20%236219-orange.svg)](https://plugins.qgis.org/plugins/axonometric_transformer/)
 [![Public Version](https://img.shields.io/badge/Plugin%20Manager-Pending%20approval-lightgrey.svg)](https://plugins.qgis.org/plugins/axonometric_transformer/)
 [![QGIS 4 Ready](https://img.shields.io/badge/QGIS%204%20Ready-Local%20AST%20verified-brightgreen.svg)](https://github.com/napattan/qgis-axonometric-transformer)
@@ -12,7 +12,7 @@
 > **Direct QGIS to 3D Axonometric & Isometric Plan Generator**  
 > Eliminates the manual *"Export 2D Map → Switch to Graphic Software → Skew/Rotate/Extrude"* pipeline. Transform the active QGIS map canvas, selected layer extents, or print layouts into presentation-ready 3D axonometric diagram plates with **1-click clipboard copy (`Ctrl+C` / `Cmd+C`)** directly into Adobe Illustrator, Affinity Designer, Photoshop, and slide presentations.
 
-**Release status (truth lock):** Registered on [plugins.qgis.org](https://plugins.qgis.org/plugins/axonometric_transformer/) as Plugin ID **6219** (`axonometric_transformer`, metadata `v1.1.2`). The portal listing currently shows **no public version yet**, so **Plugins → Manage and Install Plugins** search install is not available until a version is approved. Install today via **Method A (manual)** below. Local AST check: QGIS 4 Ready.
+**Release status (truth lock):** Registered on [plugins.qgis.org](https://plugins.qgis.org/plugins/axonometric_transformer/) as Plugin ID **6219** (`axonometric_transformer`). Latest upload is **v1.1.3** (8 Sep 2026). Portal security scan: 100% pass, 0 issues, no developer config files (plain Validated, not Validated (configured)). Qt6 check green. The public listing still shows **no public version yet**, so **Plugins → Manage and Install Plugins** search install is not available until a version is approved. Install today via **Method A (manual)** below. Local AST check: QGIS 4 Ready.
 
 ---
 
