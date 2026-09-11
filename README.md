@@ -1,6 +1,6 @@
 # 📐 Axonometric Map Transformer — QGIS Plugin
 
-[![Version](https://img.shields.io/badge/Version-v1.1.3-blue.svg)](https://github.com/napattan/qgis-axonometric-transformer)
+[![Version](https://img.shields.io/badge/Version-v1.2.0-blue.svg)](https://github.com/napattan/qgis-axonometric-transformer)
 [![Portal](https://img.shields.io/badge/plugins.qgis.org-Approved%20%236219-brightgreen.svg)](https://plugins.qgis.org/plugins/axonometric_transformer/)
 [![Plugin Manager](https://img.shields.io/badge/Plugin%20Manager-1--Click%20Install%20Live-brightgreen.svg)](https://plugins.qgis.org/plugins/axonometric_transformer/)
 [![QGIS 4 Ready](https://img.shields.io/badge/QGIS%204%20Ready-Local%20AST%20verified-brightgreen.svg)](https://github.com/napattan/qgis-axonometric-transformer)
@@ -12,7 +12,7 @@
 > **Direct QGIS to 3D Axonometric & Isometric Plan Generator**  
 > Eliminates the manual *"Export 2D Map → Switch to Graphic Software → Skew/Rotate/Extrude"* pipeline. Transform the active QGIS map canvas, selected layer extents, or print layouts into presentation-ready 3D axonometric diagram plates with **1-click clipboard copy (`Ctrl+C` / `Cmd+C`)** directly into Adobe Illustrator, Affinity Designer, Photoshop, and slide presentations.
 
-**Release status (truth lock):** Approved and LIVE on [plugins.qgis.org](https://plugins.qgis.org/plugins/axonometric_transformer/) as Plugin ID **6219** (`axonometric_transformer`, **v1.1.3**). Portal security scan: 100% pass, 0 issues. In-app search and 1-click install are live via **Plugins → Manage and Install Plugins**. QGIS 4 Ready.
+**Release status (truth lock):** Approved and LIVE on [plugins.qgis.org](https://plugins.qgis.org/plugins/axonometric_transformer/) as Plugin ID **6219** (`axonometric_transformer`, **v1.2.0**). Portal security scan: 100% pass, 0 issues. In-app search and 1-click install are live via **Plugins → Manage and Install Plugins**. QGIS 4 Ready.
 
 ---
 
@@ -37,7 +37,9 @@
 - **Circular Site Disc**: Full-bleed circular site pedestal.
 - **Isometric Diamond**: Architectural diamond plan framing.
 - **Vector Boundary Masking**: Directly clips the axonometric map to any chosen polygon layer (eliminating the need to create inverted mask layers manually).
-- **3D Base Plate Extrusion**: Adds bottom slab extrusion depth and realistic facet shading to generate floating 3D architectural site pedestals.
+- **Framing Fill Ground**: Fill the interior of the framing boundary with customizable solid or translucent ground colors and independent opacity control.
+- **Solid 3D Base Plate Extrusion**: Adds bottom slab extrusion depth and realistic facet shading. Features continuous front-wall extrusion with dynamic winding order calculation, Painter's algorithm depth sorting, and solid top cap under transparent maps.
+- **Base Plate Opacity with 5% Step Snapping**: Independent opacity slider with 5% notch snapping for both Framing Fill and 3D Base Plate.
 
 ### 4. 1-Click Clipboard & Export
 - **Copy to Clipboard (`Ctrl+C` / `Cmd+C`)**: Copies full-resolution 32-bit PNG with alpha directly to OS clipboard. Paste with `Ctrl+V` into Illustrator, Affinity, Photoshop, or PowerPoint.

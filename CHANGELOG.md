@@ -1,0 +1,10 @@
+# Changelog
+
+## [1.2.0]
+
+1.2.0:
+- Added Framing Fill ground option with customizable color and opacity.
+- Added 3D Base Plate opacity slider with 5 percent step snapping.
+- Solid 3D Base Plate engine: continuous front-wall extrusion with dynamic winding order detection, Painter's algorithm depth sorting, and solid top cap under transparent maps.
+- Clean aligned Section 3 UI grid layout with dual sliders.
+- Verified 100 percent Qt6 / QGIS 4 forward-compatibility.

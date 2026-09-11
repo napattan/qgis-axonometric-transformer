@@ -5,7 +5,7 @@ qgisMinimumVersion=3.16
 description=Instantly capture active QGIS map canvas, selected layers, or print layouts and transform into true Isometric / Dimetric / Oblique Axonometric 3D diagrams with 1-click clipboard copy and high-res PNG export.
 about=Architectural & landscape axonometric diagram generator for QGIS. Automatically applies true isometric (30°-30° / 57.74 percent squash), dimetric (2:1), or military oblique projections with circular site disc clipping, 3D base plate extrusion, tight bounding frames, and instant OS clipboard copy for seamless pasting into Adobe Illustrator, Affinity Designer, Photoshop, and presentation decks.
 category=Cartography
-version=1.1.3
+version=1.2.0
 author=Napat Phasundhiae
 email=tanfasantia@gmail.com
 homepage=https://github.com/napattan/qgis-axonometric-transformer
@@ -15,3 +15,9 @@ experimental=False
 deprecated=False
 icon=icon.png
 tags=axonometric,isometric,3d,cartography,diagram,architecture,export,clipboard,illustrator,affinity
+changelog=1.2.0:
+    - Added Framing Fill ground option with customizable color and opacity.
+    - Added 3D Base Plate opacity slider with 5 percent step snapping.
+    - Solid 3D Base Plate engine: continuous front-wall extrusion with dynamic winding order detection, Painter's algorithm depth sorting, and solid top cap under transparent maps.
+    - Clean aligned Section 3 UI grid layout with dual sliders.
+    - Verified 100 percent Qt6 / QGIS 4 forward-compatibility.

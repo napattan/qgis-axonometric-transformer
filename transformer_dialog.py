@@ -14,7 +14,7 @@ from qgis.PyQt.QtGui import (
     QImage, QPixmap, QPainter, QColor, QKeySequence
 )
 from qgis.PyQt.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
+    QDialog, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QPushButton,
     QComboBox, QSlider, QSpinBox, QCheckBox, QColorDialog, QFileDialog,
     QGroupBox, QWidget, QScrollArea, QFrame, QSplitter,
     QMessageBox, QToolTip, QSizePolicy, QApplication, QListView
@@ -392,26 +392,109 @@ class AxonometricTransformerDialog(QDialog):
         h_stroke.addWidget(self.chk_dashed)
         layout_frame.addLayout(h_stroke)
 
-        # 3D Extrusion Slab
-        h_ext = QHBoxLayout()
-        self.chk_extrusion = QCheckBox("3D Architectural Base Plate", self.grp_frame)
+        # Framing Fill and 3D Base Plate Options Grid
+        grid_plates = QGridLayout()
+        grid_plates.setContentsMargins(0, 4, 0, 4)
+        grid_plates.setHorizontalSpacing(6)
+        grid_plates.setVerticalSpacing(4)
+
+        # Row 0: [tickbox] fill framing [colorbox]
+        self.chk_fill = QCheckBox("Fill Framing", self.grp_frame)
+        self.chk_fill.setChecked(False)
+        self.chk_fill.setToolTip("Fill the interior of the framing boundary with a solid or translucent ground color.")
+        self.chk_fill.toggled.connect(self._update_render)
+        grid_plates.addWidget(self.chk_fill, 0, 0)
+
+        self.btn_fill_col = QPushButton(self.grp_frame)
+        self.btn_fill_col.setFixedSize(24, 24)
+        self.btn_fill_col.setToolTip("Choose Framing Fill Color (default: White)")
+        self.btn_fill_col.setStyleSheet(f"background-color: {self.params.fill_color}; border: 1px solid #64748b; border-radius: 3px;")
+        self.btn_fill_col.clicked.connect(self._pick_fill_color)
+        grid_plates.addWidget(self.btn_fill_col, 0, 2)
+
+        # Row 1: opacity [percentage] [slider] (Framing Fill)
+        h_fill_op = QHBoxLayout()
+        h_fill_op.setContentsMargins(0, 0, 0, 2)
+        h_fill_op.setSpacing(6)
+
+        self.lbl_fill_op = QLabel("Opacity:", self.grp_frame)
+        self.lbl_fill_op.setFixedWidth(46)
+        self.lbl_fill_op.setStyleSheet("font-size: 11px; color: #475569;")
+        h_fill_op.addWidget(self.lbl_fill_op)
+
+        self.spin_fill_opacity = QSpinBox(self.grp_frame)
+        self.spin_fill_opacity.setRange(0, 100)
+        self.spin_fill_opacity.setSingleStep(5)
+        self.spin_fill_opacity.setValue(100)
+        self.spin_fill_opacity.setSuffix(" %")
+        self.spin_fill_opacity.setFixedWidth(65)
+        self.spin_fill_opacity.setToolTip("Framing fill opacity (snaps every 5%)")
+        self.spin_fill_opacity.valueChanged.connect(self._on_fill_spin_changed)
+        h_fill_op.addWidget(self.spin_fill_opacity)
+
+        self.slider_fill_opacity = QSlider(Qt.Orientation.Horizontal, self.grp_frame)
+        self.slider_fill_opacity.setRange(0, 20)
+        self.slider_fill_opacity.setValue(20)
+        self.slider_fill_opacity.setSingleStep(1)
+        self.slider_fill_opacity.setPageStep(2)
+        self.slider_fill_opacity.setToolTip("Framing fill opacity (snaps every 5%)")
+        self.slider_fill_opacity.valueChanged.connect(self._on_fill_slider_changed)
+        h_fill_op.addWidget(self.slider_fill_opacity, 1)
+
+        grid_plates.addLayout(h_fill_op, 1, 0, 1, 4)
+
+        # Row 2: [tickbox] 3d base plate [thickness] [colorbox]
+        self.chk_extrusion = QCheckBox("3D Base Plate", self.grp_frame)
         self.chk_extrusion.setChecked(False)
         self.chk_extrusion.toggled.connect(self._update_render)
-        h_ext.addWidget(self.chk_extrusion)
+        grid_plates.addWidget(self.chk_extrusion, 2, 0)
 
         self.spin_depth = QSpinBox(self.grp_frame)
         self.spin_depth.setRange(4, 150)
         self.spin_depth.setValue(24)
         self.spin_depth.setSuffix(" px")
         self.spin_depth.valueChanged.connect(self._update_render)
-        h_ext.addWidget(self.spin_depth)
+        grid_plates.addWidget(self.spin_depth, 2, 1)
 
         self.btn_ext_col = QPushButton(self.grp_frame)
         self.btn_ext_col.setFixedSize(24, 24)
         self.btn_ext_col.setStyleSheet(f"background-color: {self.params.extrusion_color}; border: 1px solid #64748b; border-radius: 3px;")
         self.btn_ext_col.clicked.connect(self._pick_extrusion_color)
-        h_ext.addWidget(self.btn_ext_col)
-        layout_frame.addLayout(h_ext)
+        grid_plates.addWidget(self.btn_ext_col, 2, 2)
+
+        # Row 3: opacity [percentage] [slider] (3D Base Plate)
+        h_ext_op = QHBoxLayout()
+        h_ext_op.setContentsMargins(0, 0, 0, 2)
+        h_ext_op.setSpacing(6)
+
+        self.lbl_ext_op = QLabel("Opacity:", self.grp_frame)
+        self.lbl_ext_op.setFixedWidth(46)
+        self.lbl_ext_op.setStyleSheet("font-size: 11px; color: #475569;")
+        h_ext_op.addWidget(self.lbl_ext_op)
+
+        self.spin_ext_opacity = QSpinBox(self.grp_frame)
+        self.spin_ext_opacity.setRange(0, 100)
+        self.spin_ext_opacity.setSingleStep(5)
+        self.spin_ext_opacity.setValue(100)
+        self.spin_ext_opacity.setSuffix(" %")
+        self.spin_ext_opacity.setFixedWidth(65)
+        self.spin_ext_opacity.setToolTip("3D Base Plate opacity (snaps every 5%)")
+        self.spin_ext_opacity.valueChanged.connect(self._on_ext_spin_changed)
+        h_ext_op.addWidget(self.spin_ext_opacity)
+
+        self.slider_ext_opacity = QSlider(Qt.Orientation.Horizontal, self.grp_frame)
+        self.slider_ext_opacity.setRange(0, 20)
+        self.slider_ext_opacity.setValue(20)
+        self.slider_ext_opacity.setSingleStep(1)
+        self.slider_ext_opacity.setPageStep(2)
+        self.slider_ext_opacity.setToolTip("3D Base Plate opacity (snaps every 5%)")
+        self.slider_ext_opacity.valueChanged.connect(self._on_ext_slider_changed)
+        h_ext_op.addWidget(self.slider_ext_opacity, 1)
+
+        grid_plates.addLayout(h_ext_op, 3, 0, 1, 4)
+        grid_plates.setColumnStretch(3, 1)
+
+        layout_frame.addLayout(grid_plates)
 
         # Reset button at bottom of left panel
         btn_reset_left = QPushButton("🔄 Reset All Settings to Default", self.left_widget)
@@ -873,11 +956,26 @@ class AxonometricTransformerDialog(QDialog):
         self.btn_stroke_col.setStyleSheet("background-color: #2563eb; border: 1px solid #64748b; border-radius: 3px;")
         self.chk_dashed.setChecked(True)
 
-        # 5. Reset 3D Architectural Base Plate
+        # 4b. Reset Framing Fill
+        if hasattr(self, 'chk_fill'):
+            self.chk_fill.setChecked(False)
+        self.params.fill_color = "#ffffff"
+        if hasattr(self, 'btn_fill_col'):
+            self.btn_fill_col.setStyleSheet("background-color: #ffffff; border: 1px solid #64748b; border-radius: 3px;")
+        if hasattr(self, 'spin_fill_opacity'):
+            self.spin_fill_opacity.setValue(100)
+        if hasattr(self, 'slider_fill_opacity'):
+            self.slider_fill_opacity.setValue(20)
+
+        # 5. Reset 3D Base Plate
         self.chk_extrusion.setChecked(False)
         self.spin_depth.setValue(24)
         self.params.extrusion_color = "#cbd5e1"
         self.btn_ext_col.setStyleSheet("background-color: #cbd5e1; border: 1px solid #64748b; border-radius: 3px;")
+        if hasattr(self, 'spin_ext_opacity'):
+            self.spin_ext_opacity.setValue(100)
+        if hasattr(self, 'slider_ext_opacity'):
+            self.slider_ext_opacity.setValue(20)
 
         # 6. Re-render transformed map
         self._update_render()
@@ -938,12 +1036,55 @@ class AxonometricTransformerDialog(QDialog):
             self.btn_stroke_col.setStyleSheet(f"background-color: {self.params.stroke_color}; border: 1px solid #64748b; border-radius: 3px;")
             self._update_render()
 
+    def _pick_fill_color(self):
+        col = QColorDialog.getColor(QColor(self.params.fill_color), self, "Choose Framing Fill Color")
+        if col.isValid():
+            self.params.fill_color = col.name()
+            self.btn_fill_col.setStyleSheet(f"background-color: {self.params.fill_color}; border: 1px solid #64748b; border-radius: 3px;")
+            self._update_render()
+
     def _pick_extrusion_color(self):
         col = QColorDialog.getColor(QColor(self.params.extrusion_color), self, "Choose 3D Base Plate Color")
         if col.isValid():
             self.params.extrusion_color = col.name()
             self.btn_ext_col.setStyleSheet(f"background-color: {self.params.extrusion_color}; border: 1px solid #64748b; border-radius: 3px;")
             self._update_render()
+
+    def _on_fill_spin_changed(self, val: int):
+        slider_notch = int(round(val / 5.0))
+        if hasattr(self, 'slider_fill_opacity') and self.slider_fill_opacity is not None:
+            self.slider_fill_opacity.blockSignals(True)
+            self.slider_fill_opacity.setValue(slider_notch)
+            self.slider_fill_opacity.blockSignals(False)
+        self.params.fill_opacity = val / 100.0
+        self._update_render()
+
+    def _on_fill_slider_changed(self, notch: int):
+        pct = notch * 5
+        if hasattr(self, 'spin_fill_opacity') and self.spin_fill_opacity is not None:
+            self.spin_fill_opacity.blockSignals(True)
+            self.spin_fill_opacity.setValue(pct)
+            self.spin_fill_opacity.blockSignals(False)
+        self.params.fill_opacity = pct / 100.0
+        self._update_render()
+
+    def _on_ext_spin_changed(self, val: int):
+        slider_notch = int(round(val / 5.0))
+        if hasattr(self, 'slider_ext_opacity') and self.slider_ext_opacity is not None:
+            self.slider_ext_opacity.blockSignals(True)
+            self.slider_ext_opacity.setValue(slider_notch)
+            self.slider_ext_opacity.blockSignals(False)
+        self.params.extrusion_opacity = val / 100.0
+        self._update_render()
+
+    def _on_ext_slider_changed(self, notch: int):
+        pct = notch * 5
+        if hasattr(self, 'spin_ext_opacity') and self.spin_ext_opacity is not None:
+            self.spin_ext_opacity.blockSignals(True)
+            self.spin_ext_opacity.setValue(pct)
+            self.spin_ext_opacity.blockSignals(False)
+        self.params.extrusion_opacity = pct / 100.0
+        self._update_render()
 
     def _apply_map_settings_flags(self, map_settings):
         """Safely applies antialiasing and high-quality rendering flags across all QGIS 3.x versions."""
@@ -1151,10 +1292,16 @@ class AxonometricTransformerDialog(QDialog):
                 self.params.stroke_width = int(round(raw_stroke * style_scale)) if raw_stroke else 0
             if hasattr(self, 'chk_dashed') and self.chk_dashed is not None:
                 self.params.is_dashed = self.chk_dashed.isChecked()
+            if hasattr(self, 'chk_fill') and self.chk_fill is not None:
+                self.params.has_fill = self.chk_fill.isChecked()
+            if hasattr(self, 'spin_fill_opacity') and self.spin_fill_opacity is not None:
+                self.params.fill_opacity = self.spin_fill_opacity.value() / 100.0
             if hasattr(self, 'chk_extrusion') and self.chk_extrusion is not None:
                 self.params.has_extrusion = self.chk_extrusion.isChecked()
             if hasattr(self, 'spin_depth') and self.spin_depth is not None:
                 self.params.extrusion_depth = max(1, int(round(self.spin_depth.value() * style_scale)))
+            if hasattr(self, 'spin_ext_opacity') and self.spin_ext_opacity is not None:
+                self.params.extrusion_opacity = self.spin_ext_opacity.value() / 100.0
         except RuntimeError:
             return False
 
