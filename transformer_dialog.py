@@ -7,6 +7,9 @@ projection tweaking, 3D architectural base plate styling, and 1-click clipboard/
 
 import os
 import tempfile
+import re
+import time
+from datetime import datetime
 from typing import Optional, List, Dict, Tuple
 
 from qgis.PyQt.QtCore import Qt, QSize, QPointF, QTimer
@@ -223,7 +226,10 @@ class AxonometricTransformerDialog(QDialog):
         layout_source.addWidget(self.chk_transparent)
 
         btn_capture = QPushButton("🔄 Capture / Re-Render Map", self.grp_source)
-        btn_capture.setStyleSheet("font-weight: 600; padding: 6px; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; border-radius: 4px;")
+        btn_capture.setStyleSheet(
+            "font-weight: 600; padding: 6px; background: #e0f2fe; "
+            "color: #0369a1; border: 1px solid #bae6fd; border-radius: 4px;"
+        )
         btn_capture.clicked.connect(self.capture_source_image)
         layout_source.addWidget(btn_capture)
 
@@ -238,7 +244,7 @@ class AxonometricTransformerDialog(QDialog):
         self.btn_iso = QPushButton("Isometric (30°)", self.grp_proj)
         self.btn_dim = QPushButton("Dimetric (2:1)", self.grp_proj)
         self.btn_mil = QPushButton("Military (45°)", self.grp_proj)
-        
+
         for btn in (self.btn_iso, self.btn_dim, self.btn_mil):
             btn.setCheckable(True)
             h_presets.addWidget(btn)
@@ -382,7 +388,9 @@ class AxonometricTransformerDialog(QDialog):
 
         self.btn_stroke_col = QPushButton(self.grp_frame)
         self.btn_stroke_col.setFixedSize(24, 24)
-        self.btn_stroke_col.setStyleSheet(f"background-color: {self.params.stroke_color}; border: 1px solid #64748b; border-radius: 3px;")
+        self.btn_stroke_col.setStyleSheet(
+            f"background-color: {self.params.stroke_color}; border: 1px solid #64748b; border-radius: 3px;"
+        )
         self.btn_stroke_col.clicked.connect(self._pick_stroke_color)
         h_stroke.addWidget(self.btn_stroke_col)
 
@@ -408,7 +416,9 @@ class AxonometricTransformerDialog(QDialog):
         self.btn_fill_col = QPushButton(self.grp_frame)
         self.btn_fill_col.setFixedSize(24, 24)
         self.btn_fill_col.setToolTip("Choose Framing Fill Color (default: White)")
-        self.btn_fill_col.setStyleSheet(f"background-color: {self.params.fill_color}; border: 1px solid #64748b; border-radius: 3px;")
+        self.btn_fill_col.setStyleSheet(
+            f"background-color: {self.params.fill_color}; border: 1px solid #64748b; border-radius: 3px;"
+        )
         self.btn_fill_col.clicked.connect(self._pick_fill_color)
         grid_plates.addWidget(self.btn_fill_col, 0, 2)
 
@@ -458,7 +468,9 @@ class AxonometricTransformerDialog(QDialog):
 
         self.btn_ext_col = QPushButton(self.grp_frame)
         self.btn_ext_col.setFixedSize(24, 24)
-        self.btn_ext_col.setStyleSheet(f"background-color: {self.params.extrusion_color}; border: 1px solid #64748b; border-radius: 3px;")
+        self.btn_ext_col.setStyleSheet(
+            f"background-color: {self.params.extrusion_color}; border: 1px solid #64748b; border-radius: 3px;"
+        )
         self.btn_ext_col.clicked.connect(self._pick_extrusion_color)
         grid_plates.addWidget(self.btn_ext_col, 2, 2)
 
@@ -537,7 +549,10 @@ class AxonometricTransformerDialog(QDialog):
         h_prev_header.addStretch(1)
 
         btn_reset_hdr = QPushButton("🔄 Reset", self.right_widget)
-        btn_reset_hdr.setStyleSheet("padding: 2px 8px; font-size: 11px; font-weight: 600; color: #64748b; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px;")
+        btn_reset_hdr.setStyleSheet(
+            "padding: 2px 8px; font-size: 11px; font-weight: 600; "
+            "color: #64748b; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px;"
+        )
         btn_reset_hdr.clicked.connect(self.reset_to_defaults)
         h_prev_header.addWidget(btn_reset_hdr)
 
@@ -551,7 +566,7 @@ class AxonometricTransformerDialog(QDialog):
         # Action Buttons
         h_actions = QHBoxLayout()
         h_actions.setSpacing(8)
-        
+
         # Primary Action: Copy to Clipboard
         self.btn_copy = QPushButton("📋 Copy to Clipboard (Cmd/Ctrl+C)", self.right_widget)
         self.btn_copy.setStyleSheet(COPY_BTN_STYLE)
@@ -804,10 +819,12 @@ class AxonometricTransformerDialog(QDialog):
 
         selected_only = self.chk_frame_selected_only.isChecked() if hasattr(self, 'chk_frame_selected_only') else False
 
-        if (self.cached_frame_polygons is not None and
-            self.cached_frame_layer_id == layer_id and
-            self.cached_frame_selected_only == selected_only and
-            self.cached_render_extent == self.last_render_extent):
+        if (
+            self.cached_frame_polygons is not None
+            and self.cached_frame_layer_id == layer_id
+            and self.cached_frame_selected_only == selected_only
+            and self.cached_render_extent == self.last_render_extent
+        ):
             return self.cached_frame_polygons, self.cached_frame_shells
 
         layer = QgsProject.instance().mapLayer(layer_id)
@@ -941,7 +958,7 @@ class AxonometricTransformerDialog(QDialog):
         self.lbl_angle_val.setText("45°")
 
         # 3. Reset Framing & Bounding Mode
-        self.combo_mode.setCurrentIndex(0) # Full Plan / Tight Box
+        self.combo_mode.setCurrentIndex(0)  # Full Plan / Tight Box
         if hasattr(self, 'widget_frame_layer'):
             self.widget_frame_layer.setVisible(False)
         if hasattr(self, 'chk_frame_selected_only'):
@@ -1033,21 +1050,27 @@ class AxonometricTransformerDialog(QDialog):
         col = QColorDialog.getColor(QColor(self.params.stroke_color), self, "Choose Boundary Stroke Color")
         if col.isValid():
             self.params.stroke_color = col.name()
-            self.btn_stroke_col.setStyleSheet(f"background-color: {self.params.stroke_color}; border: 1px solid #64748b; border-radius: 3px;")
+            self.btn_stroke_col.setStyleSheet(
+                f"background-color: {self.params.stroke_color}; border: 1px solid #64748b; border-radius: 3px;"
+            )
             self._update_render()
 
     def _pick_fill_color(self):
         col = QColorDialog.getColor(QColor(self.params.fill_color), self, "Choose Framing Fill Color")
         if col.isValid():
             self.params.fill_color = col.name()
-            self.btn_fill_col.setStyleSheet(f"background-color: {self.params.fill_color}; border: 1px solid #64748b; border-radius: 3px;")
+            self.btn_fill_col.setStyleSheet(
+                f"background-color: {self.params.fill_color}; border: 1px solid #64748b; border-radius: 3px;"
+            )
             self._update_render()
 
     def _pick_extrusion_color(self):
         col = QColorDialog.getColor(QColor(self.params.extrusion_color), self, "Choose 3D Base Plate Color")
         if col.isValid():
             self.params.extrusion_color = col.name()
-            self.btn_ext_col.setStyleSheet(f"background-color: {self.params.extrusion_color}; border: 1px solid #64748b; border-radius: 3px;")
+            self.btn_ext_col.setStyleSheet(
+                f"background-color: {self.params.extrusion_color}; border: 1px solid #64748b; border-radius: 3px;"
+            )
             self._update_render()
 
     def _on_fill_spin_changed(self, val: int):
@@ -1333,7 +1356,10 @@ class AxonometricTransformerDialog(QDialog):
         scale = PREVIEW_MAX_EDGE / float(edge)
         nw = max(1, int(round(w * scale)))
         nh = max(1, int(round(h * scale)))
-        return img.scaled(nw, nh, Qt.AspectRatioMode.IgnoreAspectRatio, Qt.TransformationMode.SmoothTransformation), scale
+        return (
+            img.scaled(nw, nh, Qt.AspectRatioMode.IgnoreAspectRatio, Qt.TransformationMode.SmoothTransformation),
+            scale
+        )
 
     def _mode_label(self):
         mode_str = str(self.params.mode).upper()
@@ -1395,17 +1421,56 @@ class AxonometricTransformerDialog(QDialog):
         except RuntimeError:
             pass
 
+    def _get_export_filename_tag(self) -> str:
+        """Generate a concise, sanitized tag identifying the current layer or map view."""
+        tag = ""
+        try:
+            # 1. Framing layer mask if active
+            if getattr(self.params, "mode", "") == "layer_mask" and hasattr(self, "combo_frame_layer"):
+                fl_text = self.combo_frame_layer.currentText().strip()
+                if fl_text and fl_text != "Select polygon layer...":
+                    tag = fl_text
+
+            # 2. Selected layer source if source mode is Selected Layer Extent
+            if not tag and hasattr(self, "combo_source_type"):
+                src_mode = self.combo_source_type.currentText()
+                if src_mode == "Selected Layer Extent" and hasattr(self, "combo_layer"):
+                    tag = self.combo_layer.currentText().strip()
+                elif src_mode == "Spatial Bookmark" and hasattr(self, "combo_bookmark"):
+                    tag = self.combo_bookmark.currentText().strip()
+                elif src_mode == "QGIS Print Layout" and hasattr(self, "combo_layout"):
+                    tag = self.combo_layout.currentText().strip()
+
+            # 3. Active layer in QGIS canvas (e.g. user selected or toggled a layer in TOC)
+            if not tag and self.iface:
+                active_layer = self.iface.activeLayer()
+                if active_layer and active_layer.name():
+                    tag = active_layer.name().strip()
+
+            # 4. Fallback: first visible vector layer in the project layer tree
+            if not tag:
+                root = QgsProject.instance().layerTreeRoot()
+                if root:
+                    visible_layers = [lyr.name() for lyr in root.findLayers() if lyr.isVisible()]
+                    if visible_layers:
+                        tag = visible_layers[0].strip()
+        except Exception:
+            tag = ""
+        return tag
+
     def _on_copy_to_clipboard(self):
         """Copy the full-resolution transformed image to the clipboard."""
         image = self._render_export_image()
         if image.isNull():
             return
-        success = copy_image_to_clipboard(image)
+        tag = self._get_export_filename_tag()
+        success = copy_image_to_clipboard(image, filename_tag=tag)
         if success:
-            QToolTip.showText(
-                self.btn_copy.mapToGlobal(QPointF(0, -20).toPoint()),
-                "✓ Copied full-res PNG. Paste with Cmd/Ctrl+V in Illustrator / Affinity / PPT.",
+            tooltip_msg = (
+                "✓ Copied in-memory 32-bit PNG. "
+                "Paste (Cmd/Ctrl+V) directly embedded into Illustrator, Affinity & Canva."
             )
+            QToolTip.showText(self.btn_copy.mapToGlobal(QPointF(0, -20).toPoint()), tooltip_msg)
             self.btn_copy.setText("✓ Copied to Clipboard!")
             self.btn_copy.setStyleSheet(COPY_BTN_DONE_STYLE)
             QTimer.singleShot(2200, self._restore_copy_button)
@@ -1429,10 +1494,14 @@ class AxonometricTransformerDialog(QDialog):
         if os.path.isdir(thesis_fig_dir):
             default_dir = thesis_fig_dir
 
+        tag = self._get_export_filename_tag()
+        clean_tag = re.sub(r"[^a-zA-Z0-9_\-]", "_", tag or "").strip("_")
+        default_name = f"axonometric_{clean_tag}.png" if clean_tag else "axonometric_plan.png"
+
         file_path, _ = QFileDialog.getSaveFileName(
             self,
             "Save Axonometric PNG",
-            os.path.join(default_dir, "axonometric_plan.png"),
+            os.path.join(default_dir, default_name),
             "PNG Images (*.png);;All Files (*.*)"
         )
 
@@ -1463,7 +1532,16 @@ class AxonometricTransformerDialog(QDialog):
         if target_layout is None:
             target_layout = layouts[0]
 
-        temp_img_path = os.path.join(tempfile.gettempdir(), "qgis_temp_axo.png")
+        temp_dir = os.path.join(tempfile.gettempdir(), "qgis_axonometric_layout")
+        os.makedirs(temp_dir, exist_ok=True)
+        tag = self._get_export_filename_tag()
+        clean_tag = re.sub(r"[^a-zA-Z0-9_\-]", "_", tag or "").strip("_")
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        millis = int(time.time() * 1000) % 1000
+        prefix = f"qgis_axo_layout_{clean_tag}" if clean_tag else "qgis_axo_layout"
+        fname = f"{prefix}_{timestamp}_{millis:03d}.png"
+        temp_img_path = os.path.join(temp_dir, fname)
+
         if not image.save(temp_img_path, "PNG"):
             QMessageBox.warning(self, "Insert Error", "Could not write a temporary PNG for the layout.")
             return

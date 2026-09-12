@@ -11,17 +11,21 @@ from dataclasses import dataclass, replace
 from typing import Iterable, List, Optional, Sequence, Tuple
 
 try:
-    from qgis.PyQt.QtCore import Qt, QPointF, QRectF, QSize, QMimeData, QByteArray, QBuffer, QIODevice, QUrl
+    from qgis.PyQt.QtCore import (
+        Qt, QPointF, QRectF, QSize, QSizeF, QMarginsF, QMimeData, QByteArray, QBuffer, QIODevice
+    )
     from qgis.PyQt.QtGui import (
-        QImage, QPainter, QColor, QPen, QBrush, QPainterPath, QPolygonF
+        QImage, QPainter, QColor, QPen, QBrush, QPainterPath, QPolygonF, QPdfWriter, QPageSize, QPageLayout
     )
     from qgis.PyQt.QtWidgets import QApplication
     HAS_QT = True
 except ImportError:
     try:
-        from PyQt6.QtCore import Qt, QPointF, QRectF, QSize, QMimeData, QByteArray, QBuffer, QIODevice, QUrl
+        from PyQt6.QtCore import (
+            Qt, QPointF, QRectF, QSize, QSizeF, QMarginsF, QMimeData, QByteArray, QBuffer, QIODevice
+        )
         from PyQt6.QtGui import (
-            QImage, QPainter, QColor, QPen, QBrush, QPainterPath, QPolygonF
+            QImage, QPainter, QColor, QPen, QBrush, QPainterPath, QPolygonF, QPdfWriter, QPageSize, QPageLayout
         )
         from PyQt6.QtWidgets import QApplication
         HAS_QT = True
@@ -379,7 +383,9 @@ def transform_qimage(src_img: "QImage", params: AxoParams) -> "QImage":
                 _draw_extruded_shells(painter, [corners], cx, cy, depth, ext_col)
 
             # Solid top cap under map (fill color if fill active, else base plate color if extrusion active)
-            top_col = fill_col if (params.has_fill and fill_alpha > 0) else (ext_col if (depth > 0 and ext_alpha > 0) else None)
+            top_col = fill_col if (params.has_fill and fill_alpha > 0) else (
+                ext_col if (depth > 0 and ext_alpha > 0) else None
+            )
             if top_col is not None:
                 painter.setPen(Qt.PenStyle.NoPen)
                 painter.setBrush(QBrush(top_col))
@@ -477,7 +483,9 @@ def transform_qimage(src_img: "QImage", params: AxoParams) -> "QImage":
                         QPointF(cx - rx, cy + depth),
                     ]))
 
-            top_col = fill_col if (params.has_fill and fill_alpha > 0) else (ext_col if (depth > 0 and ext_alpha > 0) else None)
+            top_col = fill_col if (params.has_fill and fill_alpha > 0) else (
+                ext_col if (depth > 0 and ext_alpha > 0) else None
+            )
             if top_col is not None:
                 painter.setPen(Qt.PenStyle.NoPen)
                 painter.setBrush(QBrush(top_col))
@@ -556,7 +564,9 @@ def transform_qimage(src_img: "QImage", params: AxoParams) -> "QImage":
                 transformed_shells = [_transform_ring(r, cos_a, sin_a, h_ratio) for r in shells_src if r]
                 _draw_extruded_shells(painter, transformed_shells, cx, cy, depth, ext_col)
 
-            top_col = fill_col if (params.has_fill and fill_alpha > 0) else (ext_col if (depth > 0 and ext_alpha > 0) else None)
+            top_col = fill_col if (params.has_fill and fill_alpha > 0) else (
+                ext_col if (depth > 0 and ext_alpha > 0) else None
+            )
             if top_col is not None:
                 painter.setPen(Qt.PenStyle.NoPen)
                 painter.setBrush(QBrush(top_col))
@@ -582,42 +592,170 @@ def transform_qimage(src_img: "QImage", params: AxoParams) -> "QImage":
             painter.end()
 
 
-def copy_image_to_clipboard(image: "QImage") -> bool:
-    """Copy a QImage to the OS clipboard as transparent PNG (bypassing Windows CF_DIB black box in Illustrator)."""
-    if not HAS_QT or image is None or image.isNull():
+def _generate_in_memory_pdf(image: "QImage") -> bytes:
+    """Generate an in-memory PDF preserving exact pixel dimensions and alpha transparency (/SMask)."""
+    try:
+        w, h = image.width(), image.height()
+        buf = QBuffer()
+        buf.open(QIODevice.OpenModeFlag.ReadWrite)
+        writer = QPdfWriter(buf)
+        writer.setResolution(72)  # 72 DPI: 1 pt = 1 pixel
+        page_size = QPageSize(QSizeF(w, h), QPageSize.Unit.Point)
+        layout = QPageLayout(
+            page_size,
+            QPageLayout.Orientation.Portrait,
+            QMarginsF(0, 0, 0, 0)
+        )
+        writer.setPageLayout(layout)
+
+        painter = QPainter(writer)
+        painter.drawImage(QRectF(0, 0, w, h), image)
+        painter.end()
+
+        pdf_bytes = bytes(buf.data())
+        buf.close()
+        return pdf_bytes
+    except Exception:
+        return b""
+
+
+def _generate_in_memory_svg(image: "QImage", png_bytes: bytes) -> bytes:
+    """Generate an in-memory SVG containing embedded 32-bit transparent PNG."""
+    try:
+        import base64
+        w, h = image.width(), image.height()
+        b64_png = base64.b64encode(png_bytes).decode('ascii')
+        svg_str = (
+            f'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" '
+            f'width="{w}" height="{h}" viewBox="0 0 {w} {h}">'
+            f'<image width="{w}" height="{h}" xlink:href="data:image/png;base64,{b64_png}"/>'
+            f'</svg>'
+        )
+        return svg_str.encode('utf-8')
+    except Exception:
+        return b""
+
+
+def _copy_windows_in_memory(png_bytes: bytes, pdf_bytes: bytes, svg_bytes: bytes) -> bool:
+    """
+    Copy multi-format in-memory bundle to Windows clipboard (PDF + SVG + PNG).
+    - Adobe Illustrator: Pastes via native 'Portable Document Format' / 'PDF' as an EMBEDDED object
+      with 100% full alpha transparency (no black box, no diagonal 'X').
+    - Figma: Pastes via 'image/svg+xml'.
+    - Canva, Photoshop, Affinity, Discord, Office: Pastes via 'image/png' / 'PNG'.
+    - Zero files on disk, zero CF_HDROP, zero CF_DIB (avoids black background).
+    """
+    try:
+        import ctypes
+        from ctypes import wintypes
+
+        user32 = ctypes.windll.user32
+        kernel32 = ctypes.windll.kernel32
+
+        user32.OpenClipboard.argtypes = [wintypes.HWND]
+        user32.OpenClipboard.restype = wintypes.BOOL
+        user32.EmptyClipboard.restype = wintypes.BOOL
+        user32.SetClipboardData.argtypes = [wintypes.UINT, wintypes.HANDLE]
+        user32.SetClipboardData.restype = wintypes.HANDLE
+        user32.CloseClipboard.restype = wintypes.BOOL
+
+        kernel32.GlobalAlloc.argtypes = [wintypes.UINT, ctypes.c_size_t]
+        kernel32.GlobalAlloc.restype = wintypes.HGLOBAL
+        kernel32.GlobalLock.argtypes = [wintypes.HGLOBAL]
+        kernel32.GlobalLock.restype = ctypes.c_void_p
+        kernel32.GlobalUnlock.argtypes = [wintypes.HGLOBAL]
+        kernel32.GlobalUnlock.restype = wintypes.BOOL
+
+        GMEM_MOVEABLE = 0x0002
+
+        CF_PDF_FULL = user32.RegisterClipboardFormatW("Portable Document Format")
+        CF_PDF = user32.RegisterClipboardFormatW("PDF")
+        CF_SVG = user32.RegisterClipboardFormatW("image/svg+xml")
+        CF_PNG = user32.RegisterClipboardFormatW("PNG")
+        CF_PNG_MIME = user32.RegisterClipboardFormatW("image/png")
+
+        formats_to_set = []
+        if pdf_bytes:
+            if CF_PDF_FULL:
+                formats_to_set.append((CF_PDF_FULL, pdf_bytes))
+            if CF_PDF:
+                formats_to_set.append((CF_PDF, pdf_bytes))
+        if svg_bytes and CF_SVG:
+            formats_to_set.append((CF_SVG, svg_bytes))
+        if png_bytes:
+            if CF_PNG:
+                formats_to_set.append((CF_PNG, png_bytes))
+            if CF_PNG_MIME:
+                formats_to_set.append((CF_PNG_MIME, png_bytes))
+
+        if not user32.OpenClipboard(None):
+            return False
+        user32.EmptyClipboard()
+
+        for fmt_id, data in formats_to_set:
+            h_mem = kernel32.GlobalAlloc(GMEM_MOVEABLE, len(data))
+            if h_mem:
+                ptr = kernel32.GlobalLock(h_mem)
+                if ptr:
+                    ctypes.memmove(ptr, data, len(data))
+                    kernel32.GlobalUnlock(h_mem)
+                    user32.SetClipboardData(fmt_id, h_mem)
+
+        user32.CloseClipboard()
+        return True
+    except Exception:
         return False
-    clipboard = QApplication.clipboard()
-    if clipboard is None:
+
+
+def copy_image_to_clipboard(image: "QImage", filename_tag: str = "") -> bool:
+    """
+    Copy a QImage to the OS clipboard as an in-memory multi-format transparent bundle (PDF + SVG + PNG).
+    Pastes directly as a 100% transparent EMBEDDED graphic across Adobe Illustrator,
+    Photoshop, Affinity Designer, Canva, and Figma without generating any files on disk.
+    """
+    if not HAS_QT or image is None or image.isNull():
         return False
 
     export = image
     if image.format() == QImage.Format.Format_ARGB32_Premultiplied:
         export = image.convertToFormat(QImage.Format.Format_ARGB32)
 
+    # 1. In-memory 32-bit PNG bytes
     byte_array = QByteArray()
     buffer = QBuffer(byte_array)
     buffer.open(QIODevice.OpenModeFlag.WriteOnly)
     export.save(buffer, "PNG")
     buffer.close()
+    png_bytes = bytes(byte_array)
+
+    # 2. In-memory PDF bytes (native PDF-1.4 with /SMask 8-bit alpha transparency for Illustrator & Affinity)
+    pdf_bytes = _generate_in_memory_pdf(export)
+
+    # 3. In-memory SVG bytes (with embedded base64 32-bit PNG for Figma & vector tools)
+    svg_bytes = _generate_in_memory_svg(export, png_bytes)
+
+    # On Windows, inject the multi-format memory bundle (PDF + SVG + PNG, no CF_DIB / no CF_HDROP)
+    import sys
+    if sys.platform == "win32":
+        if _copy_windows_in_memory(png_bytes, pdf_bytes, svg_bytes):
+            return True
+
+    # Cross-platform Qt clipboard fallback (macOS, Linux)
+    clipboard = QApplication.clipboard()
+    if clipboard is None:
+        return False
 
     mime_data = QMimeData()
-    # NOTE: DO NOT call mime_data.setImageData(export)!
-    # On Windows, setImageData registers legacy CF_DIB GDI bitmap which strips alpha channels and renders black in Illustrator.
-    # By registering only 32-bit PNG mime and CF_HDROP file URL, Illustrator and Affinity import the native transparent PNG!
+    if pdf_bytes:
+        mime_data.setData("application/pdf", pdf_bytes)
+        mime_data.setData("Portable Document Format", pdf_bytes)
+        mime_data.setData("PDF", pdf_bytes)
+    if svg_bytes:
+        mime_data.setData("image/svg+xml", svg_bytes)
     mime_data.setData("PNG", byte_array)
     mime_data.setData("image/png", byte_array)
     mime_data.setData("image/x-png", byte_array)
     mime_data.setData("public.png", byte_array)
-
-    try:
-        import tempfile
-        import os
-        temp_dir = tempfile.gettempdir()
-        temp_path = os.path.join(temp_dir, "qgis_axonometric_clipboard.png")
-        export.save(temp_path, "PNG")
-        mime_data.setUrls([QUrl.fromLocalFile(temp_path)])
-    except (OSError, AttributeError):
-        pass
 
     clipboard.setMimeData(mime_data)
     return True

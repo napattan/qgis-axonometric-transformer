@@ -5,7 +5,7 @@ qgisMinimumVersion=3.16
 description=Instantly capture active QGIS map canvas, selected layers, or print layouts and transform into true Isometric / Dimetric / Oblique Axonometric 3D diagrams with 1-click clipboard copy and high-res PNG export.
 about=Architectural & landscape axonometric diagram generator for QGIS. Automatically applies true isometric (30°-30° / 57.74 percent squash), dimetric (2:1), or military oblique projections with circular site disc clipping, 3D base plate extrusion, tight bounding frames, and instant OS clipboard copy for seamless pasting into Adobe Illustrator, Affinity Designer, Photoshop, and presentation decks.
 category=Cartography
-version=1.2.0
+version=1.2.1
 author=Napat Phasundhiae
 email=tanfasantia@gmail.com
 homepage=https://github.com/napattan/qgis-axonometric-transformer
@@ -15,9 +15,12 @@ experimental=False
 deprecated=False
 icon=icon.png
 tags=axonometric,isometric,3d,cartography,diagram,architecture,export,clipboard,illustrator,affinity
-changelog=1.2.0:
-    - Added Framing Fill ground option with customizable color and opacity.
-    - Added 3D Base Plate opacity slider with 5 percent step snapping.
-    - Solid 3D Base Plate engine: continuous front-wall extrusion with dynamic winding order detection, Painter's algorithm depth sorting, and solid top cap under transparent maps.
-    - Clean aligned Section 3 UI grid layout with dual sliders.
-    - Verified 100 percent Qt6 / QGIS 4 forward-compatibility.
+changelog=1.2.1:
+    - In-Memory Multi-Format Clipboard Engine: Direct embedded paste with transparent background into Adobe Illustrator and Affinity Designer via in-memory PDF with soft mask alpha (/SMask).
+    - Added image/svg+xml clipboard format for Figma and image/png for Canva, Photoshop, and Microsoft Office.
+    - Zero temporary disk files during clipboard copy (100 percent in-memory transit).
+    - Fixed Qt6 AST forward-compatibility: explicitly scoped QPageSize.Unit.Point and QPageLayout.Orientation.Portrait for the in-memory PDF writer (QGIS 4 Ready).
+    - 100 percent Flake8 PEP8 code quality compliance (0 violations).
+
+
+

@@ -73,5 +73,6 @@ def install():
     print("3. Check 'Axonometric Map Transformer' to enable it.")
     print("4. Click the 3D isometric cube icon on the toolbar or access via 'Plugins > Axonometric Map Transformer'.")
 
+
 if __name__ == "__main__":
     install()

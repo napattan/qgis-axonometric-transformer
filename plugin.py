@@ -27,7 +27,9 @@ class AxonometricTransformerPlugin:
         icon = QIcon(icon_path) if os.path.exists(icon_path) else QIcon()
 
         self.action = QAction(icon, "Axonometric Map Transformer", self.iface.mainWindow())
-        self.action.setStatusTip("Transform active QGIS canvas/layout into 3D isometric & axonometric diagram with 1-click clipboard copy")
+        self.action.setStatusTip(
+            "Transform active QGIS canvas/layout into 3D isometric & axonometric diagram with 1-click clipboard copy"
+        )
         self.action.triggered.connect(self.run)
 
         # Add to Plugins Menu & Toolbar
@@ -65,4 +67,3 @@ class AxonometricTransformerPlugin:
         self.dialog.show()
         self.dialog.raise_()
         self.dialog.activateWindow()
-
